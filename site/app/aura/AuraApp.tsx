@@ -110,6 +110,8 @@ export default function AuraApp() {
   const recRef = useRef<SRLike | null>(null);
   const speakingRef = useRef(false);
   const replyStateRef = useRef<Exclude<AuraState, "thinking" | "speaking">>("idle");
+  // импульс «слова» для вибрации сферы под голос (читается и затухает в Sphere)
+  const speechKickRef = useRef(0);
   const lastWakeRef = useRef(0);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -257,7 +259,13 @@ export default function AuraApp() {
       u.pitch = 0.85; // чуть ниже обычного — тембр «Джарвиса»
       u.onstart = () => {
         speakingRef.current = true;
+        speechKickRef.current = 1;
         setState("speaking");
+      };
+      // граница слова/предложения: сфера получает толчок в такт речи.
+      // На Android Chrome событие не приходит — там работает непрерывная модуляция в Sphere
+      u.onboundary = () => {
+        speechKickRef.current = 1;
       };
       u.onend = () => {
         speakingRef.current = false;
@@ -659,7 +667,7 @@ export default function AuraApp() {
       <main className="relative z-10 mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 py-6 lg:grid-cols-[1.1fr_1fr]">
         {/* сфера */}
         <section className="flex min-h-[360px] flex-col items-center justify-center gap-6 rounded-2xl border border-cyan-400/10 bg-[#050510]/80 py-10 lg:h-[calc(100dvh-160px)]">
-          <Sphere state={state} />
+          <Sphere state={state} kickRef={speechKickRef} />
           <div className="text-center font-mono">
             <p className={`text-sm tracking-[0.35em] ${STATE_TEXT[state]}`}>{STATE_LABEL[state]}</p>
             <p className="mt-2 text-xs text-neutral-500">{STATE_HINT[state]}</p>

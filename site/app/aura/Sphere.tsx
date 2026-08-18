@@ -11,7 +11,13 @@ const COLORS: Record<AuraState, [number, number, number]> = {
   speaking: [125, 211, 252], // небесно-голубой — говорит
 };
 
-export default function Sphere({ state }: { state: AuraState }) {
+export default function Sphere({
+  state,
+  kickRef,
+}: {
+  state: AuraState;
+  kickRef?: { current: number };
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<AuraState>(state);
   stateRef.current = state;
@@ -58,7 +64,19 @@ export default function Sphere({ state }: { state: AuraState }) {
 
       const speed = reduced ? 0 : st === "thinking" || st === "speaking" ? 1.5 : 0.35;
       const period = st === "thinking" || st === "speaking" ? 1.1 : 3.4;
-      const pulse = reduced ? 1 : 1 + 0.05 * Math.sin((t * Math.PI * 2) / period);
+
+      // «вибрация под голос»: импульс от каждого слова (onboundary) затухает ~0.4с,
+      // а между словами — непрерывная речевая модуляция двумя частотами
+      const kick = kickRef?.current ?? 0;
+      if (kick > 0 && kickRef) kickRef.current = Math.max(0, kick - dt * 2.5);
+      const talk =
+        st === "speaking"
+          ? 0.05 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 3.1)) +
+            0.035 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 7.3 + 1.7))
+          : 0;
+
+      const pulse = reduced ? 1 : 1 + 0.045 * Math.sin((t * Math.PI * 2) / period) + talk + kick * 0.09;
+      const glowBoost = Math.min(2, 1 + kick * 0.8 + talk * 4);
       angle += dt * speed;
 
       const w = canvas.clientWidth;
@@ -84,10 +102,10 @@ export default function Sphere({ state }: { state: AuraState }) {
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
 
-      // центральное свечение
+      // центральное свечение (ярче при «речи»)
       const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.6);
-      glow.addColorStop(0, `rgba(${r},${g},${b},0.30)`);
-      glow.addColorStop(0.45, `rgba(${r},${g},${b},0.08)`);
+      glow.addColorStop(0, `rgba(${r},${g},${b},${Math.min(0.9, 0.3 * glowBoost).toFixed(3)})`);
+      glow.addColorStop(0.45, `rgba(${r},${g},${b},${Math.min(0.4, 0.08 * glowBoost).toFixed(3)})`);
       glow.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = glow;
       ctx.beginPath();

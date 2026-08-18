@@ -1,3 +1,13 @@
+// Встроенный предпросмотр (iframe в портфолио): показываем контент сразу,
+// там скролла нет и IntersectionObserver не срабатывает
+const embedded = window.self !== window.top;
+if (embedded) {
+  document.documentElement.classList.add("embed");
+  document.querySelectorAll(".reveal").forEach((el) =>
+    el.classList.add("visible")
+  );
+}
+
 // Появление блоков при скролле
 const observer = new IntersectionObserver(
   (entries) => {

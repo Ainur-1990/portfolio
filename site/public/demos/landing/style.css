@@ -145,3 +145,7 @@ input.invalid { border-color: #d9534f; }
   .form-row { grid-template-columns: 1fr; }
   .hero { padding: 80px 0; }
 }
+
+/* ============ Режим встроенного предпросмотра ============ */
+html.embed .hero { padding: 56px 0; }
+html.embed .section { padding: 48px 0; }

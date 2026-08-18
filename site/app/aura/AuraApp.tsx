@@ -90,6 +90,7 @@ type Saved = {
   model?: string;
   voiceOut?: boolean;
   voiceURI?: string;
+  freeTalk?: boolean;
 };
 
 export default function AuraApp() {
@@ -108,6 +109,7 @@ export default function AuraApp() {
   const [micPhase, setMicPhase] = useState<MicPhase>("listening");
   const [voiceOut, setVoiceOut] = useState(true);
   const [voiceURI, setVoiceURI] = useState("");
+  const [freeTalk, setFreeTalk] = useState(false);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [srSupported, setSrSupported] = useState(false);
 
@@ -120,6 +122,10 @@ export default function AuraApp() {
   const micOnRef = useRef(micOn);
   micOnRef.current = micOn;
   const micPhaseRef = useRef<MicPhase>("listening");
+  const freeTalkRef = useRef(freeTalk);
+  freeTalkRef.current = freeTalk;
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
   const recRef = useRef<SRLike | null>(null);
   const speakingRef = useRef(false);
   const replyStateRef = useRef<Exclude<AuraState, "thinking" | "speaking">>("idle");
@@ -143,6 +149,7 @@ export default function AuraApp() {
         if (d.model) setModel(d.model);
         if (typeof d.voiceOut === "boolean") setVoiceOut(d.voiceOut);
         if (d.voiceURI) setVoiceURI(d.voiceURI);
+        if (typeof d.freeTalk === "boolean") setFreeTalk(d.freeTalk);
         setMessages(
           fresh && Array.isArray(d.messages) && d.messages.length
             ? d.messages
@@ -181,12 +188,13 @@ export default function AuraApp() {
         model,
         voiceOut,
         voiceURI,
+        freeTalk,
       };
       localStorage.setItem(STORE_KEY, JSON.stringify(data));
     } catch {
       /* приватный режим браузера — живём без памяти */
     }
-  }, [messages, name, mode, endpoint, model, voiceOut, voiceURI]);
+  }, [messages, name, mode, endpoint, model, voiceOut, voiceURI, freeTalk]);
 
   // автопрокрутка чата
   useEffect(() => {
@@ -209,6 +217,23 @@ export default function AuraApp() {
       window.speechSynthesis.onvoiceschanged = null;
     };
   }, []);
+
+  // если микрофон уже разрешён — начинаем слушать сразу, без кнопки 🎙
+  useEffect(() => {
+    if (!srSupported) return;
+    const perms = (
+      navigator as Navigator & { permissions?: { query?: (d: { name: PermissionName }) => Promise<PermissionStatus> } }
+    ).permissions;
+    if (!perms?.query) return;
+    perms
+      .query({ name: "microphone" as PermissionName })
+      .then((p) => {
+        if (p.state === "granted") setMicOn(true);
+      })
+      .catch(() => {
+        /* браузер без Permissions API — включим кнопкой */
+      });
+  }, [srSupported]);
 
   useEffect(() => {
     return () => {
@@ -416,7 +441,7 @@ export default function AuraApp() {
     };
 
     rec.onresult = (e: SREvent) => {
-      if (speakingRef.current) return; // не слушаем собственный голос
+      if (speakingRef.current || busyRef.current) return; // не слушаем себя и не мешаем ответу
       let finalText = "";
       let interimText = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -425,6 +450,15 @@ export default function AuraApp() {
         else interimText += r[0].transcript + " ";
       }
       const heard = finalText || interimText;
+      if (freeTalkRef.current) {
+        // свободный режим: любая законченная фраза — обращение к AURA
+        const cmd = finalText
+          .trim()
+          .replace(/^(?:аура|aura)[,\s—-]*/i, "")
+          .trim();
+        if (cmd.length >= 3) submitVoice(cmd);
+        return;
+      }
       if (micPhaseRef.current === "listening") {
         const m = heard.toLowerCase().match(WAKE_RE);
         if (m && m.index !== undefined) {
@@ -503,7 +537,7 @@ export default function AuraApp() {
           ...m,
           {
             role: "aura",
-            text: "Голосовой режим активирован. Скажите «AURA», а затем команду — например: «AURA, привет» или «AURA, который час».",
+            text: "Голосовой режим активирован. Скажите «AURA», а затем команду — например: «AURA, привет» или «AURA, который час». А в ⚙ настройках можно включить режим без кодового слова — тогда я буду отвечать на любую вашу речь.",
             ts: Date.now(),
           },
         ]);
@@ -536,11 +570,13 @@ export default function AuraApp() {
   }
 
   const micHint =
-    micPhase === "listening"
-      ? "🎤 слушаю кодовое слово «AURA»…"
-      : micPhase === "command"
-        ? "🎤 слушаю команду…"
-        : "🎤 обрабатываю…";
+    micPhase === "processing"
+      ? "🎤 обрабатываю…"
+      : freeTalk
+        ? "🎤 слушаю вас — просто говорите"
+        : micPhase === "command"
+          ? "🎤 слушаю команду…"
+          : "🎤 слушаю кодовое слово «AURA»…";
 
   return (
     <div className="relative flex min-h-dvh flex-col bg-[#03030a] text-neutral-100">
@@ -645,6 +681,15 @@ export default function AuraApp() {
                 <span className="text-neutral-400">Отвечать голосом (синтез речи)</span>
               </label>
               <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={freeTalk}
+                  onChange={(e) => setFreeTalk(e.target.checked)}
+                  className="h-4 w-4 accent-cyan-400"
+                />
+                <span className="text-neutral-400">Отвечать на любую речь (без кодового слова)</span>
+              </label>
+              <label className="flex items-center gap-2">
                 <span className="text-neutral-500">ГОЛОС</span>
                 <select
                   value={voiceURI}
@@ -687,7 +732,7 @@ export default function AuraApp() {
             <p className="mt-2 text-xs text-neutral-500">{STATE_HINT[state]}</p>
             <p className="mt-4 text-[10px] uppercase tracking-widest text-neutral-700">
               ядро: {mode === "demo" ? "демо (встроенное)" : `ollama · ${model}`} · голос:{" "}
-              {micOn ? "кодовое слово «AURA»" : "выкл"}
+              {micOn ? (freeTalk ? "слушаю вас" : "кодовое слово «AURA»") : "выкл"}
             </p>
           </div>
         </section>

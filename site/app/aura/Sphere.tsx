@@ -8,6 +8,7 @@ const COLORS: Record<AuraState, [number, number, number]> = {
   care: [52, 211, 153], // зелёный — забота
   alert: [248, 113, 113], // красный — тревога
   thinking: [165, 243, 252], // яркое свечение — обработка
+  speaking: [125, 211, 252], // небесно-голубой — говорит
 };
 
 export default function Sphere({ state }: { state: AuraState }) {
@@ -55,8 +56,8 @@ export default function Sphere({ state }: { state: AuraState }) {
       }
       const [r, g, b] = [Math.round(cur[0]), Math.round(cur[1]), Math.round(cur[2])];
 
-      const speed = reduced ? 0 : st === "thinking" ? 1.5 : 0.35;
-      const period = st === "thinking" ? 1.1 : 3.4;
+      const speed = reduced ? 0 : st === "thinking" || st === "speaking" ? 1.5 : 0.35;
+      const period = st === "thinking" || st === "speaking" ? 1.1 : 3.4;
       const pulse = reduced ? 1 : 1 + 0.05 * Math.sin((t * Math.PI * 2) / period);
       angle += dt * speed;
 

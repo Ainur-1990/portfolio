@@ -1,7 +1,7 @@
 // Демо-ядро AURA: локальный анализ сообщений и ответы в стиле «Джарвиса».
 // Полноценное ядро подключается через Ollama (см. SYSTEM_PROMPT ниже).
 
-export type AuraState = "idle" | "care" | "alert" | "thinking";
+export type AuraState = "idle" | "care" | "alert" | "thinking" | "speaking";
 export type Msg = { role: "user" | "aura"; text: string; ts: number };
 
 export const SYSTEM_PROMPT =
@@ -18,7 +18,7 @@ const GREETING = /(привет|здравствуй|здорово|добрый
 const FAREWELL = /(пока\b|до свидан|прощай|спокойной ночи|увидимся)/i;
 const NAME_RE = /(?:меня зовут|моё имя|я\s—)\s*([A-Za-zА-Яа-яЁё-]{2,20})/i;
 
-export function detectState(text: string): Exclude<AuraState, "thinking"> {
+export function detectState(text: string): Exclude<AuraState, "thinking" | "speaking"> {
   if (NEGATIVE.test(text)) return "alert";
   if (POSITIVE.test(text) || GREETING.test(text)) return "care";
   return "idle";
@@ -35,7 +35,7 @@ const JOKES = [
 export function generateReply(
   text: string,
   mem: { name?: string }
-): { reply: string; state: Exclude<AuraState, "thinking">; name?: string } {
+): { reply: string; state: Exclude<AuraState, "thinking" | "speaking">; name?: string } {
   const t = text.toLowerCase();
   const you = mem.name ? `, ${mem.name}` : "";
 
@@ -110,7 +110,7 @@ export function generateReply(
   if (/(что ты умеешь|что можешь|помощь|help|команды|возможности)/i.test(t)) {
     return {
       reply:
-        "Вот что я умею в прототипе: помню ваше имя и переписку 7 дней (потом память сама очищается), показываю время и дату, реагирую на ваше самочувствие — сфера краснеет и включается режим «Забота», шучу и поддерживаю беседу. А через ⚙ настройки можно подключить настоящее ИИ-ядро — Ollama на вашем компьютере. Тогда я буду отвечать по-настоящему.",
+        "Вот что я умею в прототипе: помню ваше имя и переписку 7 дней, показываю время и дату, реагирую на ваше самочувствие — сфера краснеет и включается режим «Забота», шучу и поддерживаю беседу. Нажмите 🎙 — и я буду слышать кодовое слово «AURA»: скажите «AURA, привет», и я отвечу голосом. А через ⚙ настройки можно подключить настоящее ИИ-ядро — Ollama на вашем компьютере.",
       state: "idle",
     };
   }

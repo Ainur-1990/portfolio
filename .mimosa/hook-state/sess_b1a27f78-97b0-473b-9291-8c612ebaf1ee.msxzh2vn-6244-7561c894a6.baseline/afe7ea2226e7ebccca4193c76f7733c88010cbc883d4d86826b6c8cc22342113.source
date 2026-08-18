@@ -44,7 +44,7 @@ export default function Home() {
             Привет, я
           </p>
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
-            Аинур
+            Имя Фамилия
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-400">
             Делаю сайты, Telegram-ботов и автоматизацию для малого бизнеса.
@@ -58,7 +58,7 @@ export default function Home() {
               Смотреть проекты
             </a>
             <a
-              href="https://t.me/f_r_e_n_d_s_90"
+              href="https://t.me/username"
               className="rounded-full border border-white/20 px-6 py-3 font-medium transition hover:bg-white/10"
             >
               Написать в Telegram
@@ -122,18 +122,18 @@ export default function Home() {
       >
         <p>
           Связь:{" "}
-          <a href="https://t.me/f_r_e_n_d_s_90" className="text-neutral-300 hover:text-white">
+          <a href="https://t.me/username" className="text-neutral-300 hover:text-white">
             Telegram
           </a>{" "}
           ·{" "}
           <a
-            href="https://github.com/Ainur-1990"
+            href="https://github.com/username"
             className="text-neutral-300 hover:text-white"
           >
             GitHub
           </a>
         </p>
-        <p className="mt-2">© {new Date().getFullYear()} Аинур</p>
+        <p className="mt-2">© {new Date().getFullYear()} Имя Фамилия</p>
       </footer>
     </>
   );

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Аинур — портфолио",
+  title: "Имя Фамилия — портфолио",
   description:
     "Сайты, Telegram-боты и автоматизация для малого бизнеса. Быстро, чисто, под ключ.",
 };

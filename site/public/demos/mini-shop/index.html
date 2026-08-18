@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ТЕХНОЛАВКА — гаджеты и аксессуары</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="#">ТЕХНО<span>ЛАВКА</span></a>
+      <input id="search" type="search" placeholder="Поиск товаров…" />
+      <button class="cart-btn" id="cart-open">
+        🛒 Корзина <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+    <div class="container categories" id="categories"></div>
+  </header>
+
+  <main class="container">
+    <h1 class="visually-hidden">Каталог товаров</h1>
+    <div class="products" id="products"></div>
+    <p class="empty" id="empty" hidden>Ничего не найдено 🤷</p>
+  </main>
+
+  <!-- Корзина -->
+  <div class="overlay" id="overlay" hidden>
+    <aside class="cart" role="dialog" aria-label="Корзина">
+      <div class="cart-head">
+        <h2>Корзина</h2>
+        <button class="close" id="cart-close" aria-label="Закрыть">×</button>
+      </div>
+      <div class="cart-items" id="cart-items"></div>
+      <div class="cart-empty" id="cart-empty">Корзина пуста</div>
+      <div class="cart-foot">
+        <p class="cart-total">Итого: <span id="cart-total">0</span> ₽</p>
+        <button class="btn btn-accent" id="checkout">Оформить заказ</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Оформление -->
+  <div class="overlay" id="checkout-overlay" hidden>
+    <div class="checkout" role="dialog" aria-label="Оформление заказа">
+      <div class="cart-head">
+        <h2>Оформление заказа</h2>
+        <button class="close" id="checkout-close" aria-label="Закрыть">×</button>
+      </div>
+      <form id="order-form" novalidate>
+        <label>Имя <input name="name" required /></label>
+        <label>Телефон <input name="phone" id="order-phone" required placeholder="+7 (___) ___-__-__" /></label>
+        <label>Адрес доставки <input name="address" required /></label>
+        <p class="order-total">К оплате: <span id="order-total">0</span> ₽</p>
+        <p class="form-status" id="order-status"></p>
+        <button class="btn btn-accent" type="submit">Подтвердить заказ</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <p>ТЕХНОЛАВКА · демо-магазин · оплата при получении</p>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

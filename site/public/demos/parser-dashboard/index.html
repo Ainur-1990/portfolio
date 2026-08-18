@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Мониторинг цен — дашборд</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    :root {
+      --bg: #0f1420; --surface: #1a2130; --border: #2a3448;
+      --text: #e8ecf4; --muted: #8b96aa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 32px 20px; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .sub { color: var(--muted); margin-bottom: 32px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px; margin-bottom: 24px;
+    }
+    .card h2 { font-size: 1.05rem; margin-bottom: 16px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+    .stat .label { color: var(--muted); font-size: 0.85rem; }
+    .stat .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+    .up { color: #e06c75; } .down { color: #6dbf7e; }
+    #file-hint { color: var(--muted); font-size: 0.9rem; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📊 Мониторинг цен конкурентов</h1>
+    <p class="sub">Данные из prices.csv — обновляется запуском <code>npm run parse</code></p>
+
+    <div class="card">
+      <h2>Динамика по магазинам</h2>
+      <canvas id="chart" height="120"></canvas>
+      <p id="file-hint"></p>
+    </div>
+
+    <div class="card">
+      <h2>Сводка за сегодня</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+
+  <script>
+    // Дашборд читает CSV, положенный рядом через fetch при локальном сервере,
+    // а при открытии файла напрямую — предлагает выбрать его вручную.
+    async function loadCsv() {
+      try {
+        const res = await fetch("prices.csv");
+        if (!res.ok) throw new Error();
+        return await res.text();
+      } catch {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".csv";
+        return new Promise((resolve) => {
+          input.onchange = async () =>
+            resolve(await input.files[0].text());
+          document.getElementById("file-hint").textContent =
+            "CSV не подхватился автоматически — выбери файл prices.csv:";
+          document.getElementById("file-hint").append(input);
+          return null;
+        });
+      }
+    }
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/).slice(1);
+      return lines
+        .map((l) => {
+          const [date, product, shop, price] = l.split(",");
+          return { date, product, shop, price: Number(price) };
+        })
+        .filter((r) => r.date && Number.isFinite(r.price));
+    }
+
+    function buildChart(rows) {
+      const shops = [...new Set(rows.map((r) => r.shop))];
+      const dates = [...new Set(rows.map((r) => r.date))].sort();
+
+      const datasets = shops.map((shop, i) => ({
+        label: shop,
+        data: dates.map(
+          (d) =>
+            rows.find((r) => r.shop === shop && r.date === d)?.price ?? null
+        ),
+        spanGaps: true,
+        borderColor: ["#5eb1f6", "#f6b35e", "#6dbf7e"][i % 3],
+        backgroundColor: "transparent",
+        tension: 0.3,
+        pointRadius: 3,
+      }));
+
+      new Chart(document.getElementById("chart"), {
+        type: "line",
+        data: { labels: dates, datasets },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: "#e8ecf4" } } },
+          scales: {
+            x: { ticks: { color: "#8b96aa" }, grid: { color: "#2a3448" } },
+            y: { ticks: { color: "#8b96aa" }, grid: { color: "#2a3448" } },
+          },
+        },
+      });
+    }
+
+    function buildStats(rows) {
+      const stats = document.getElementById("stats");
+      const shops = [...new Set(rows.map((r) => r.shop))];
+
+      const html = shops.map((shop) => {
+        const shopRows = rows.filter((r) => r.shop === shop).sort((a, b) => a.date.localeCompare(b.date));
+        const first = shopRows[0].price;
+        const last = shopRows.at(-1).price;
+        const delta = last - first;
+        const cls = delta > 0 ? "up" : delta < 0 ? "down" : "";
+        const sign = delta > 0 ? "+" : "";
+        const min = Math.min(...shopRows.map((r) => r.price));
+        return `
+          <div class="stat">
+            <p class="label">${shop}</p>
+            <p class="value">${last} ₽</p>
+            <p class="${cls}">${sign}${delta} ₽ с начала · мин ${min} ₽</p>
+          </div>`;
+      }).join("");
+      stats.innerHTML = html;
+    }
+
+    const csvText = await loadCsv();
+    if (csvText) {
+      const rows = parseCsv(csvText);
+      if (rows.length) {
+        buildChart(rows);
+        buildStats(rows);
+      } else {
+        document.getElementById("file-hint").textContent =
+          "CSV пустой — сначала запусти: npm run parse";
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram-бот записи — демо</title>
+  <style>
+    :root {
+      --tg-bg: #99BA92;
+      --tg-panel: #ffffff;
+      --tg-in: #ffffff;
+      --tg-out: #EEFFDB;
+      --tg-accent: #3390EC;
+      --tg-text: #000000;
+      --tg-muted: #707579;
+      --tg-border: #E4E9EC;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      background: linear-gradient(160deg, #dbddbb, #6ba587);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+    .phone {
+      width: 100%;
+      max-width: 380px;
+      background: var(--tg-bg);
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 0 0 10px #1c1c1e, 0 0 0 12px #3a3a3c;
+      display: flex;
+      flex-direction: column;
+      height: 700px;
+    }
+    .chat-header {
+      background: var(--tg-panel);
+      border-bottom: 1px solid var(--tg-border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3390EC, #2EB8B0);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .chat-header .name { font-weight: 600; font-size: 15px; }
+    .chat-header .status { color: var(--tg-muted); font-size: 12.5px; }
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .msg {
+      max-width: 82%;
+      padding: 8px 12px 6px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--tg-text);
+      position: relative;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      animation: pop 0.35s ease both;
+    }
+    .msg.in { background: var(--tg-in); align-self: flex-start; border-top-left-radius: 4px; }
+    .msg.out { background: var(--tg-out); align-self: flex-end; border-top-right-radius: 4px; }
+    .msg .time {
+      float: right;
+      margin: 6px -4px -2px 8px;
+      font-size: 11px;
+      color: var(--tg-muted);
+      display: inline-flex; align-items: center; gap: 3px;
+    }
+    .msg.out .time { color: #5BB01F; }
+    .keyboard {
+      align-self: flex-start;
+      background: var(--tg-in);
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+      padding: 4px;
+      margin-top: 2px;
+      animation: pop 0.35s ease both;
+    }
+    .kb-row { display: flex; gap: 4px; padding: 3px; }
+    .kb-btn {
+      flex: 1;
+      background: linear-gradient(180deg, #fff, #f2f6fa);
+      border: 1px solid #dfe6ec;
+      border-radius: 10px;
+      padding: 9px 10px;
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--tg-accent);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .kb-btn:hover { background: #e8f2fc; }
+    .kb-btn:active { transform: scale(0.96); }
+    .service-label {
+      align-self: center;
+      background: rgba(0,0,0,0.18);
+      color: #fff;
+      font-size: 12px;
+      border-radius: 12px;
+      padding: 4px 12px;
+      margin: 8px 0 2px;
+    }
+    .check { color: #4FAE3E; font-weight: 700; }
+    .chat-input {
+      background: var(--tg-panel);
+      border-top: 1px solid var(--tg-border);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chat-input .field {
+      flex: 1;
+      background: #f1f3f5;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 14px;
+      color: var(--tg-muted);
+    }
+    .chat-input .send {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--tg-accent);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(10px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .note {
+      position: fixed;
+      bottom: 10px;
+      left: 0; right: 0;
+      text-align: center;
+      color: rgba(255,255,255,0.85);
+      font-size: 12.5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="chat-header">
+      <div class="avatar">✂️</div>
+      <div>
+        <div class="name">BarberBot</div>
+        <div class="status">бот</div>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chat">
+      <div class="msg in">
+        Привет! Я помогу записаться в барбершоп «Borodach». 👋<br>Выбери услугу:
+        <span class="time">12:01</span>
+      </div>
+      <div class="keyboard">
+        <div class="kb-row"><div class="kb-btn" onclick="pick(this)">Мужская стрижка · 1200₽</div></div>
+        <div class="kb-row">
+          <div class="kb-btn" onclick="pick(this)">Борода · 800₽</div>
+          <div class="kb-btn" onclick="pick(this)">Комплекс · 1800₽</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <div class="field">Сообщение</div>
+      <div class="send">➤</div>
+    </div>
+  </div>
+
+  <p class="note">Демо интерфейса: нажимайте кнопки, как в настоящем Telegram</p>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const now = () =>
+      new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+
+    function scroll() { chat.scrollTop = chat.scrollHeight; }
+
+    function user(text) {
+      const el = document.createElement("div");
+      el.className = "msg out";
+      el.innerHTML = text + '<span class="time">' + now() + "</span>";
+      chat.appendChild(el);
+      scroll();
+    }
+
+    function bot(html, delay = 600) {
+      setTimeout(() => {
+        const el = document.createElement("div");
+        el.className = "msg in";
+        el.innerHTML = html + '<span class="time">' + now() + "</span>";
+        chat.appendChild(el);
+        scroll();
+      }, delay);
+    }
+
+    function buttons(rows) {
+      setTimeout(() => {
+        const kb = document.createElement("div");
+        kb.className = "keyboard";
+        rows.forEach((r) => {
+          const row = document.createElement("div");
+          row.className = "kb-row";
+          r.forEach((label) => {
+            const b = document.createElement("div");
+            b.className = "kb-btn";
+            b.textContent = label;
+            b.onclick = () => pick(b);
+            row.appendChild(b);
+          });
+          kb.appendChild(row);
+        });
+        chat.appendChild(kb);
+        scroll();
+      }, 800);
+    }
+
+    function pick(btn) {
+      const choice = btn.textContent;
+      user(choice);
+
+      if (choice.includes("Комплекс") || choice.includes("стрижка") || choice.includes("Борода")) {
+        bot("Отличный выбор! Выбери мастера:");
+        buttons([
+          ["Алексей ⭐️⭐️⭐️⭐️⭐️"],
+          ["Марат", "Дмитрий"],
+        ]);
+      } else if (["Алексей ⭐️⭐️⭐️⭐️⭐️", "Марат", "Дмитрий"].includes(choice)) {
+        bot("На какой день?");
+        buttons([
+          ["Сегодня, 14:00", "Сегодня, 16:30"],
+          ["Завтра, 11:00", "Завтра, 15:00"],
+        ]);
+      } else if (choice.includes(":")) {
+        bot(
+          'Записываю… <span class="check">✓ Готово!</span><br><br>' +
+          "Услуга: <b>Мужская стрижка</b><br>Мастер: <b>Алексей</b><br>Время: <b>" +
+          choice + "</b><br><br>Адрес: ул. Ленина, 42. Ждём тебя! 💈"
+        );
+        setTimeout(() => {
+          const kb = document.createElement("div");
+          kb.className = "keyboard";
+          kb.innerHTML =
+            '<div class="kb-row"><div class="kb-btn" onclick="location.reload()">🔁 Записаться снова</div></div>';
+          chat.appendChild(kb);
+          scroll();
+        }, 800);
+      }
+    }
+  </script>
+</body>
+</html>

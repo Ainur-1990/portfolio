@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BARBER — мужская парикмахерская</title>
+  <meta name="description" content="Стрижки и борода в центре города. Запишись онлайн за 30 секунд." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="#hero">BARBER</a>
+      <nav class="nav">
+        <a href="#services">Услуги</a>
+        <a href="#gallery">Галерея</a>
+        <a href="#reviews">Отзывы</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+      <a class="btn btn-accent" href="#booking">Записаться</a>
+    </div>
+  </header>
+
+  <section class="hero" id="hero">
+    <div class="container hero-inner">
+      <h1 class="reveal">Стрижка, которая<br />работает на тебя</h1>
+      <p class="hero-sub reveal">
+        Мужская парикмахерская в центре города. Без лишних слов —
+        кресло, ножницы, результат.
+      </p>
+      <a class="btn btn-accent btn-lg reveal" href="#booking">Записаться онлайн</a>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="container">
+      <h2 class="section-title reveal">Услуги и цены</h2>
+      <div class="services">
+        <article class="card reveal">
+          <h3>Мужская стрижка</h3>
+          <p class="card-desc">Консультация, мытьё, стрижка, укладка</p>
+          <p class="price">1500 ₽ <span>· 60 мин</span></p>
+        </article>
+        <article class="card reveal">
+          <h3>Оформление бороды</h3>
+          <p class="card-desc">Контур, триммер, уходовое масло</p>
+          <p class="price">900 ₽ <span>· 30 мин</span></p>
+        </article>
+        <article class="card reveal">
+          <h3>Комплекс</h3>
+          <p class="card-desc">Стрижка + борода + напиток в подарок</p>
+          <p class="price">2100 ₽ <span>· 90 мин</span></p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="gallery">
+    <div class="container">
+      <h2 class="section-title reveal">Наши работы</h2>
+      <div class="gallery">
+        <div class="gallery-item reveal"></div>
+        <div class="gallery-item reveal"></div>
+        <div class="gallery-item reveal"></div>
+        <div class="gallery-item reveal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="reviews">
+    <div class="container">
+      <h2 class="section-title reveal">Отзывы</h2>
+      <div class="reviews">
+        <blockquote class="card reveal">
+          <p>«Хожу третий раз всегда к Алексею. Ровно, быстро, по делу.»</p>
+          <cite>— Сергей</cite>
+        </blockquote>
+        <blockquote class="card reveal">
+          <p>«Записался через сайт за минуту, никакой телефонной рутины.»</p>
+          <cite>— Андрей</cite>
+        </blockquote>
+        <blockquote class="card reveal">
+          <p>«Лучший контур бороды в городе. Проверено.»</p>
+          <cite>— Максим</cite>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="section booking" id="booking">
+    <div class="container">
+      <h2 class="section-title reveal">Записаться</h2>
+      <form class="form reveal" id="booking-form" novalidate>
+        <div class="form-row">
+          <label>
+            Имя
+            <input type="text" name="name" required placeholder="Как к тебе обращаться" />
+          </label>
+          <label>
+            Телефон
+            <input type="tel" name="phone" id="phone" required placeholder="+7 (___) ___-__-__" />
+          </label>
+        </div>
+        <label>
+          Услуга
+          <select name="service">
+            <option>Мужская стрижка</option>
+            <option>Оформление бороды</option>
+            <option>Комплекс</option>
+          </select>
+        </label>
+        <button class="btn btn-accent btn-lg" type="submit">Отправить заявку</button>
+        <p class="form-status" id="form-status" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer" id="contacts">
+    <div class="container footer-inner">
+      <p>BARBER · ул. Центральная, 1 · ежедневно 10:00–21:00</p>
+      <p><a href="tel:+70000000000">+7 (000) 000-00-00</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -8,9 +8,35 @@ export type Project = {
   solution: string[];
   features: string[];
   color: string;
+  demoUrl: string;
+  demoHost: string;
 };
 
+const demo = (slug: string) => `/demos/${slug}/index.html`;
+
 export const projects: Project[] = [
+  {
+    slug: "aura-os",
+    title: "AURA — ИИ-ассистент",
+    tagline: "Киберпанк-ассистент: 3D-сфера, память на 7 дней, локальное ИИ-ядро",
+    emoji: "🔮",
+    stack: ["Next.js", "TypeScript", "Canvas 3D", "Ollama"],
+    color: "from-cyan-500 to-violet-600",
+    demoUrl: "/aura",
+    demoHost: "aura://local",
+    task: "Нужен ИИ-помощник в стиле «Джарвиса», который живёт прямо на устройстве пользователя: без облака, API-ключей и передачи данных.",
+    solution: [
+      "Пульсирующая 3D-сфера на Canvas: цвет и ритм отражают состояние — ожидание, забота, тревога",
+      "Чат с вежливой «личностью» и распознаванием самочувствия собеседника",
+      "Память на localStorage с циклом 7 дней — переписка и имя не переживают дедлайн",
+      "Подключение настоящей нейросети через Ollama — локально, по принципу BYOK без ключей",
+    ],
+    features: [
+      "Полностью локально: работает без интернета и API-ключей",
+      "Сфера реагирует на эмоции: краснеет и ускоряет пульс в режиме «Забота»",
+      "Запоминает имя и историю диалога на 7 дней",
+    ],
+  },
   {
     slug: "telegram-bot",
     title: "Telegram-бот записи",
@@ -18,6 +44,8 @@ export const projects: Project[] = [
     emoji: "🤖",
     stack: ["Node.js", "grammY", "Telegram Bot API"],
     color: "from-sky-500 to-blue-600",
+    demoUrl: demo("telegram-bot"),
+    demoHost: "t.me/BarberBot",
     task:
       "Малому бизнесу (барбершоп, салон, автосервис) нужна запись клиентов без платных CRM и звонков менеджеру.",
     solution: [
@@ -38,6 +66,8 @@ export const projects: Project[] = [
     emoji: "💈",
     stack: ["HTML", "CSS", "JavaScript"],
     color: "from-amber-500 to-orange-600",
+    demoUrl: demo("landing"),
+    demoHost: "barbershop-borodach.ru",
     task:
       "Локальному бизнесу нужен сайт-визитка, который грузится мгновенно и приводит заявки с телефона.",
     solution: [
@@ -58,6 +88,8 @@ export const projects: Project[] = [
     emoji: "📊",
     stack: ["Node.js", "cheerio", "Chart.js"],
     color: "from-emerald-500 to-teal-600",
+    demoUrl: demo("parser-dashboard"),
+    demoHost: "price-monitor.local",
     task:
       "Магазину нужно отслеживать цены у конкурентов и видеть динамику, чтобы вовремя менять свои.",
     solution: [
@@ -78,6 +110,8 @@ export const projects: Project[] = [
     emoji: "🛒",
     stack: ["HTML", "CSS", "JavaScript"],
     color: "from-violet-500 to-purple-600",
+    demoUrl: demo("mini-shop"),
+    demoHost: "mini-shop.demo",
     task:
       "Небольшому продавцу нужен каталог товаров с корзиной без дорогой платформы вроде Shopify.",
     solution: [

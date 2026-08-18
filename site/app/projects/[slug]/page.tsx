@@ -43,6 +43,38 @@ export default async function ProjectPage({
         ))}
       </div>
 
+      <div className="mt-8">
+        <a
+          href={project.demoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-primary inline-block rounded-full px-7 py-3 font-medium text-white"
+        >
+          Открыть демо в новом окне ↗
+        </a>
+      </div>
+
+      {/* встроенное живое демо */}
+      <div className="glass mt-8 overflow-hidden rounded-2xl">
+        <div className="border-b border-white/10 bg-white/5 px-4 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="flex gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
+              <span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
+            </span>
+            <span className="ml-2 flex-1 truncate rounded-md bg-black/30 px-3 py-1 font-mono text-xs text-neutral-400">
+              {project.demoHost}
+            </span>
+          </div>
+        </div>
+        <iframe
+          src={project.demoUrl}
+          title={`Демо: ${project.title}`}
+          className="h-[600px] w-full border-0"
+        />
+      </div>
+
       <section className="mt-12">
         <h2 className="text-xl font-semibold">Задача</h2>
         <p className="mt-3 leading-7 text-neutral-300">{project.task}</p>

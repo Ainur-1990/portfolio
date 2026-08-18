@@ -250,9 +250,10 @@ export default function AuraApp() {
       const v = voices.find((x) => x.voiceURI === voiceURI);
       if (v) return v;
     }
-    // «голос Джарвиса»: предпочитаем низкие мужские русские голоса
+    // предпочитаем женские русские голоса (Irina на Windows, Google русский на Android)
     return (
-      voices.find((v) => /pavel|yuri|dmitri|artem|male|мужск/i.test(v.name)) ?? voices[0]
+      voices.find((v) => /irina|milena|ekaterina|katya|alena|female|женск|google/i.test(v.name)) ??
+      voices[0]
     );
   }
 
@@ -268,8 +269,8 @@ export default function AuraApp() {
       } else {
         u.lang = "ru-RU";
       }
-      u.rate = 1.02;
-      u.pitch = 0.85; // чуть ниже обычного — тембр «Джарвиса»
+      u.rate = 0.96;
+      u.pitch = 0.9; // чуть ниже и медленнее — мягкий чувственный тембр
       u.onstart = () => {
         speakingRef.current = true;
         speechKickRef.current = 1;
@@ -650,7 +651,7 @@ export default function AuraApp() {
                   onChange={(e) => setVoiceURI(e.target.value)}
                   className="rounded-lg border border-white/10 bg-[#0a0a18] px-3 py-2 text-neutral-200 outline-none focus:border-cyan-400/50"
                 >
-                  <option value="">Авто («Джарвис» — мужской)</option>
+                  <option value="">Авто (женственный)</option>
                   {voices.map((v) => (
                     <option key={v.voiceURI} value={v.voiceURI}>
                       {v.name}

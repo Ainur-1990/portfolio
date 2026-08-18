@@ -49,6 +49,19 @@ const STATE_TEXT: Record<AuraState, string> = {
 
 const QUICK_PROMPTS = ["Привет!", "Меня зовут Айнур", "Я устал", "Что ты умеешь?", "Который час?"];
 
+// русские голоси читают латиницу по буквам — для речи подставляем русское написание
+const SPEECH_MAP: Array<[RegExp, string]> = [
+  [/AURA/gi, "Аура"],
+  [/Ollama/g, "Оллама"],
+  [/UNLIMITED_DEVELOPER/g, "анлимитед-девелопер"],
+  [/https?:\/\//gi, "аштэ-тэ-пэ "],
+  [/\bhttps?\b/gi, "аштэ-тэ-пэ"],
+];
+
+function forSpeech(text: string): string {
+  return SPEECH_MAP.reduce((s, [re, to]) => s.replace(re, to), text);
+}
+
 type MicPhase = "listening" | "command" | "processing";
 
 // минимальные типы Web Speech Recognition (в TS DOM-либе их нет)
@@ -247,7 +260,7 @@ export default function AuraApp() {
   function speak(text: string): boolean {
     if (!voiceOut || !("speechSynthesis" in window) || !text) return false;
     try {
-      const u = new SpeechSynthesisUtterance(text);
+      const u = new SpeechSynthesisUtterance(forSpeech(text));
       const v = pickVoice();
       if (v) {
         u.voice = v;

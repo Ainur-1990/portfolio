@@ -1,0 +1,13 @@
+{
+  "name": "parser-dashboard",
+  "version": "1.0.0",
+  "description": "Парсер цен конкурентов с CSV-историей и дашбордом на Chart.js",
+  "type": "module",
+  "scripts": {
+    "parse": "node parse.js",
+    "serve": "npx serve ."
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}
